@@ -63,3 +63,92 @@ if __name__ == "__main__":
 
 #If any other dev tries to create a new payment method and forgets to add a "pay" method inside it, Python will crash with an error when the user tries to use it. 
 #Hence it acts as a safety net , signifying that a required method is missing
+
+
+
+#Slightly Improved Version
+
+#Strategy Pattern
+
+def finalcheck(checkoutamount):
+    if checkoutamount != 0 and checkoutamount > 0:
+        print(f"Remaining unpaid amount:\n{checkoutamount}\n")
+    elif checkoutamount == 0:
+        print("Purchase Complete!")
+    else:
+        print("You overpaid!\n")
+        print(f"{abs(checkoutamount)} has been returned to your account")
+    
+from abc import ABC, abstractmethod
+
+class PaymentStrategy(ABC):
+    @abstractmethod
+    def pay(self,amount:float):
+        pass
+
+
+class CreditCardPayment(PaymentStrategy):
+    def pay(self,amount:float):
+        print(f"Price ${amount:.2f} via CreditCard\n")
+
+
+class PayPalPayment(PaymentStrategy):
+    def pay(self,amount:float):
+        print(f"Paid ${amount:.2f} via PayPal\n")
+
+class BitcoinPayment(PaymentStrategy):
+    def pay(self,amount:float):
+        print(f"Paid ${amount:.2f} via Bitcoin\n")
+
+
+class PaymentProcess():
+
+    def __init__(self,paymentstrategy):
+        self.paymentstrategy = paymentstrategy
+
+    def checkout(self,amount):
+        self.paymentstrategy.pay(amount)
+
+#MAIN
+
+checkoutamount = float(input("Enter checkout amount: "))
+is_running = True
+while is_running:
+
+    print(f"----------------------------------\nCheckout Amount: {checkoutamount}")
+    amount1 = float(input("Enter amount to be paid via Credit Card\n:"))
+
+    cart = PaymentProcess(PayPalPayment())
+    cart.checkout(amount1)
+    checkoutamount -= amount1
+
+    finalcheck(checkoutamount)
+
+    #Change Strategy
+
+
+    if checkoutamount != 0 and checkoutamount >0:
+
+        amount2 = float(input("How much would you like to pay via PayPal\n:"))
+        cart.paymentstrategy = CreditCardPayment()
+        cart.checkout(amount2)
+        checkoutamount -= amount2
+
+        finalcheck(checkoutamount)
+
+    else:
+        break
+
+    #Change Strategy again
+    if checkoutamount != 0 and checkoutamount >0:
+        amount3 = float(input("How much would you like to pay via Bitcoin\n:"))
+        cart.paymentstrategy = BitcoinPayment()
+        cart.checkout(amount3)
+        checkoutamount -= amount3
+
+        finalcheck(checkoutamount)
+
+    else:
+        break
+
+    is_running = False
